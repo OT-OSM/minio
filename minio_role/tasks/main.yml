@@ -1,44 +1,13 @@
 ---
-# tasks file for minio_role
+# Tasks for Debian-based systems
+
+- name: Update apt package list
+  ansible.builtin.apt:
+    update_cache: "{{ update_cache }}"
+  become: yes
+
 - name: Install MinIO
-  include_tasks: install.yml
+  include_tasks: "{{ install_tasks_file }}"
 
 - name: Configure MinIO
-  include_tasks: configure.yml
-
-- name: Manage MinIO service
-  include_tasks: service.yml
-
-
-- name: Update APT package index (Debian)
-  apt:
-    update_cache: yes
-  when: ansible_os_family == "Debian"
-  become: yes
-
-- name: Ensure essential packages are installed (Debian)
-  apt:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - vim
-    - git
-    - curl
-    - wget
-  when: ansible_os_family == "Debian"
-  become: yes
-
-- name: Ensure essential packages are installed (RedHat/CentOS)
-  yum:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - vim
-    - git
-    - curl
-    - wget
-  when: ansible_os_family == "RedHat"
-  become: yes
-
-
-
+  include_tasks: "{{ configure_tasks_file }}"

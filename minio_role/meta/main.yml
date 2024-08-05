@@ -1,8 +1,10 @@
-# meta/main.yml
+---
+# meta file for minio_role
+
 dependencies: []
 
 galaxy_info:
-  author: your_name
-  description: Ansible role for MinIO
-  company: your_company
-  license: license_name
+  author: "{{ author }}"
+  description: "{{ description }}"
+  company: "{{ company }}"
+  license: "{{ license }}"

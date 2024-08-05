@@ -3,3 +3,4 @@
 - hosts: aws_ec2
   roles:
     - minio_role
+

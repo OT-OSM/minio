@@ -1,4 +1,0 @@
-# tests/test.yml
-- hosts: all
-  roles:
-    - minio

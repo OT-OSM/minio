@@ -1,38 +1,75 @@
-# tasks/configure.yml
- - name: Ensure minio group exists
-   group:
-     name: minio
-     state: present
-   retries: 5
-   delay: 5
-   until: result is success
-   register: result
-   become: yes
+---
+# tasks file for minio_role
 
- - name: Ensure minio user exists
-   user:
-     name: minio
-     group: minio
-     create_home: yes
-     shell: /bin/bash
-     state: present
-   become: yes
-  
+- name: Ensure minio group exists
+  group:
+    name: "{{ minio_group_name }}"
+    state: present
+  retries: 5
+  delay: 5
+  until: result is success
+  register: result
+  become: yes
 
- - name: Create MinIO configuration directory
-   file:
-     path: /etc/minio
-     state: directory
-     mode: '0755'
-     owner: minio
-     group: minio
-   become: yes
+- name: Ensure minio user exists
+  user:
+    name: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+    create_home: yes
+    shell: "{{ minio_user_shell }}"
+    state: present
+  become: yes
 
+- name: Create MinIO configuration directory
+  file:
+    path: "{{ minio_config_dir }}"
+    state: directory
+    mode: "{{ directory_mode }}"
+    owner: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+  become: yes
 
+- name: Create MinIO group
+  group:
+    name: "{{ minio_group_name }}"
+    state: present
+  become: yes
 
-   
+- name: Create MinIO user
+  user:
+    name: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+    system: "{{ minio_user_system }}"
+    shell: "{{ minio_user_shell }}"
+  become: yes
 
-   
-     
+- name: Set ownership of MinIO binary
+  file:
+    path: "{{ minio_binary_path }}"
+    owner: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+    mode: "{{ directory_mode }}"
+  become: yes
 
-    
+- name: Set ownership of MinIO data directory
+  file:
+    path: "{{ minio_data_dir }}"
+    owner: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+    recurse: yes
+  become: yes
+
+- name: Set ownership of MinIO config directory
+  file:
+    path: "{{ minio_config_dir }}"
+    owner: "{{ minio_user_name }}"
+    group: "{{ minio_group_name }}"
+    recurse: yes
+  become: yes
+
+- name: Copy MinIO service file
+  copy:
+    src: "{{ minio_service_src }}"
+    dest: "{{ minio_service_dest }}"
+    mode: "{{ file_mode }}"
+  become: yes
