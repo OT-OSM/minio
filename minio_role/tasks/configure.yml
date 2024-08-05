@@ -1,0 +1,38 @@
+# tasks/configure.yml
+ - name: Ensure minio group exists
+   group:
+     name: minio
+     state: present
+   retries: 5
+   delay: 5
+   until: result is success
+   register: result
+   become: yes
+
+ - name: Ensure minio user exists
+   user:
+     name: minio
+     group: minio
+     create_home: yes
+     shell: /bin/bash
+     state: present
+   become: yes
+  
+
+ - name: Create MinIO configuration directory
+   file:
+     path: /etc/minio
+     state: directory
+     mode: '0755'
+     owner: minio
+     group: minio
+   become: yes
+
+
+
+   
+
+   
+     
+
+    

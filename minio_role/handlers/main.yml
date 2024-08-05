@@ -1,0 +1,9 @@
+---
+# handlers file for minio_role
+- name: restart minio
+  systemd:
+    name: minio
+    state: restarted
+
+
+

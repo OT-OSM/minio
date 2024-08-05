@@ -1,0 +1,58 @@
+- name: Create MinIO group
+  group:
+    name: minio
+    state: present
+  become: yes
+
+- name: Create MinIO user
+  user:
+    name: minio
+    group: minio
+    system: yes
+    shell: /sbin/nologin
+  become: yes
+
+- name: Set ownership of MinIO binary
+  file:
+    path: /usr/local/bin/minio
+    owner: minio
+    group: minio
+    mode: '0755'
+  become: yes
+
+- name: Set ownership of MinIO data directory
+  file:
+    path: /data
+    owner: minio
+    group: minio
+    recurse: yes
+  become: yes
+
+- name: Set ownership of MinIO config directory
+  file:
+    path: /etc/minio
+    owner: minio
+    group: minio
+    recurse: yes
+  become: yes
+
+- name: Copy MinIO service file
+  copy:
+    src: minio.service
+    dest: /etc/systemd/system/minio.service
+    mode: '0644'
+  become: yes
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+  become: yes
+  async: 120
+  poll: 10
+  register: result
+
+- name: Debug systemd reload result
+  debug:
+    var: result
+  become: yes
+
+
