@@ -11,3 +11,14 @@
 
 - name: Configure MinIO
   include_tasks: "{{ configure_tasks_file }}"
+
+
+- name: Include task variables
+  include_vars: vars/main.yml
+    
+
+- name: Setup MinIO
+  include_tasks: "setup_{{ minio_deployment_type }}.yml"
+     
+
+

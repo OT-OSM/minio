@@ -1,0 +1,29 @@
+---
+# Tasks for setting up MinIO on a single node with multiple drives
+
+- name: Create MinIO configuration directory
+  file:
+    path: /etc/minio
+    state: directory
+    mode: '0755'
+    owner: minio
+    group: minio
+  become: yes
+
+- name: Set up MinIO data directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: minio
+    group: minio
+  with_items: "{{ minio_drives }}"
+  become: yes
+
+- name: Start MinIO server
+  shell: |
+    minio server {{ minio_drives | join(' ') }}
+  become: yes
+  environment:
+    MINIO_ACCESS_KEY: "{{ minio_access_key }}"
+    MINIO_SECRET_KEY: "{{ minio_secret_key }}"
