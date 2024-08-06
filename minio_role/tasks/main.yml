@@ -1,10 +1,7 @@
 ---
 # Tasks for Debian-based systems
 
-- name: Update apt package list
-  ansible.builtin.apt:
-    update_cache: "{{ update_cache }}"
-  become: yes
+
 
 - name: Install MinIO
   include_tasks: "install.yml"
