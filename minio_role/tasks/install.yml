@@ -1,6 +1,9 @@
 ---
-# tasks file for minio_role
-
+- name: Update apt package list
+  ansible.builtin.apt:
+    update_cache: "{{ update_cache }}"
+  become: yes
+  
 - name: Download MinIO binary
   get_url:
     url: "{{ minio_download_url }}"
@@ -11,4 +14,12 @@
 - name: Install MinIO binary
   apt:
     deb: "{{ minio_deb_path }}"
+  become: yes
+
+- name: Ensure MinIO binary has execute permissions
+  file:
+    path: "{{ minio_deb_path }}" 
+    mode: '0755'
+    owner: minio
+    group: minio
   become: yes

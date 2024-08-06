@@ -1,20 +1,9 @@
 ---
-# Tasks for Debian-based systems
-
-- name: Update apt package list
-  ansible.builtin.apt:
-    update_cache: "{{ update_cache }}"
-  become: yes
-
 - name: Install MinIO
   include_tasks: "install.yml"
 
 - name: Configure MinIO
-  include_tasks: "{{ configure_tasks_file }}"
-
-
-- name: Include task variables
-  include_vars: vars/main.yml
+  include_tasks: "configure.yml"
 
 - name: Ensure MinIO data directories exist
   file:

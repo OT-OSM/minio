@@ -59,30 +59,26 @@ install_tasks_file: "install.yml"
 configure_tasks_file: "configure.yml"
 
 
-# Variables for MinIO deployment
-minio_deployment_type: "single-node-multi-drive"  # Options: single-node-single-drive, single-node-multi-drive, multi-node-multi-drive
-
 # General MinIO configuration
 minio_version: "RELEASE.2024-08-01T00-00-00Z"
 minio_port: 9000
-minio_access_key: "your-access-key"
-minio_secret_key: "your-secret-key"
+minio_access_key: "minio1234567890"
+minio_secret_key: "1234567890minio"
 
-# Single-node configurations
-minio_single_node_drive: "/data/minio"
+minio_data_dirs:
+  single-node-single-drive:
+    - /data/minio1
+  single-node-multi-drive:
+    - /data/minio1
+    - /data/minio2
+    - /data/minio3
+    - /data/minio4
+  multi-node-multi-drive:
+    - /data/minio1
+    - /data/minio2
+    - /data/minio3
+    - /data/minio4
 
-# Multi-drive configurations (can be used for both single-node and multi-node setups)
-minio_drives:
-  - "/data/minio1"
-  - "/data/minio2"
-  - "/data/minio3"
-  - "/data/minio4"
-
-# Multi-node configurations
-minio_nodes:
-  - "node1.example.com"
-  - "node2.example.com"
-  - "node3.example.com"
 
 
 

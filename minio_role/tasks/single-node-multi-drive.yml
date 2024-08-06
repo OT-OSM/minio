@@ -4,7 +4,6 @@
   environment:
     MINIO_ACCESS_KEY: "{{ minio_access_key }}"
     MINIO_SECRET_KEY: "{{ minio_secret_key }}"
-  systemd:
     state: started
     enabled: yes  
   become: yes

@@ -1,13 +1,4 @@
 ---
-# tasks file for minio_role
-
-#- name: Ensure MinIO service is running
- # systemd:
-  #  name: minio
-   # state: started
-    #enabled: yes
-  #become: yes
-
 - name: Ensure minio group exists
   group:
     name: "{{ minio_group_name }}"
