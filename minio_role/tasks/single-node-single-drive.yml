@@ -1,0 +1,8 @@
+---
+- name: Start MinIO server with single drive
+  command: "minio server /data/minio1 --config-dir /etc/minio"
+  environment:
+    MINIO_ACCESS_KEY: "{{ minio_access_key }}"
+    MINIO_SECRET_KEY: "{{ minio_secret_key }}"
+  become: yes
+  become_user: minio_user

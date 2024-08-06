@@ -48,6 +48,17 @@ minio_download_url: "https://dl.min.io/server/minio/release/linux-amd64/archive/
 minio_deb_path: "/tmp/minio.deb"
 deb_file_mode: "0755"
 
+
+# Variables for Debian-based systems tasks
+
+# Update apt package list
+update_cache: yes
+
+# File paths for tasks
+install_tasks_file: "install.yml"
+configure_tasks_file: "configure.yml"
+
+
 # Variables for MinIO deployment
 minio_deployment_type: "single-node-multi-drive"  # Options: single-node-single-drive, single-node-multi-drive, multi-node-multi-drive
 
@@ -67,7 +78,11 @@ minio_drives:
   - "/data/minio3"
   - "/data/minio4"
 
-
+# Multi-node configurations
+minio_nodes:
+  - "node1.example.com"
+  - "node2.example.com"
+  - "node3.example.com"
 
 
 

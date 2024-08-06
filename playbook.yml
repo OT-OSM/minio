@@ -1,6 +1,9 @@
 ---
-
 - hosts: aws_ec2
+  vars_prompt:
+    - name: "deployment_type"
+      prompt: "Which type of deployment do you want (single-node-single-drive, single-node-multi-drive, multi-node-multi-drive)?"
+      private: no
+
   roles:
     - minio_role
-

@@ -6,5 +6,5 @@ minio_data_dir: /data/minio
 minio_config_dir: /etc/minio
 minio_user: minio
 minio_group: minio
-minio_access_key: "your-access-key"
-minio_secret_key: "your-secret-key"
+minio_access_key: "minio1234567890"
+minio_secret_key: "1234567890minio"

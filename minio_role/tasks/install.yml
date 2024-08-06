@@ -1,10 +1,6 @@
 ---
 # tasks file for minio_role
-- name: Update apt package list
-  ansible.builtin.apt:
-    update_cache: "{{ update_cache }}"
-  become: yes
-  
+
 - name: Download MinIO binary
   get_url:
     url: "{{ minio_download_url }}"
