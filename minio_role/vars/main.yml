@@ -79,10 +79,25 @@ minio_data_dirs:
     - /data/minio3
     - /data/minio4
 
+# OS specific
+minio_user: "minio"
+minio_group: "minio"
 
+minio_packages:
+  RedHat: 
+    - wget
+    - unzip
+  Debian: 
+    - wget
+    - unzip
+  CentOS: 
+    - wget
+    - unzip
 
-
-
+minio_service: 
+  RedHat: "minio"
+  Debian: "minio"
+  CentOS: "minio"
 
 
 

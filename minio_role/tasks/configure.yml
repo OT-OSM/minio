@@ -32,6 +32,8 @@
     name: "{{ minio_group_name }}"
     state: present
   become: yes
+  when: ansible_os_family in ['RedHat', 'Debian', 'CentOS']
+
 
 - name: Create MinIO user
   user:
