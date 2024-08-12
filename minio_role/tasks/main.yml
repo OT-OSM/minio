@@ -5,16 +5,4 @@
 - name: Configure MinIO
   include_tasks: "configure.yml"
 
-- name: Ensure MinIO data directories exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: minio
-    group: minio
-    mode: '0755'
-  loop: "{{ minio_data_dirs[deployment_type] }}"
-  when: deployment_type in ['single-node-single-drive', 'single-node-multi-drive', 'multi-node-multi-drive']
 
-- name: Start MinIO server with the chosen deployment type
-  include_tasks: "{{ deployment_type }}.yml"
-  when: deployment_type in ['single-node-single-drive', 'single-node-multi-drive', 'multi-node-multi-drive']
