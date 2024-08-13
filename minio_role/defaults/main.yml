@@ -1,0 +1,10 @@
+---
+# defaults file for minio_role
+minio_version: "RELEASE.2024-08-01T00-00-00Z"
+minio_port: 9000
+minio_data_dir: /data/minio
+minio_config_dir: /etc/minio
+minio_user: minio
+minio_group: minio
+minio_access_key: "minio1234567890"
+minio_secret_key: "1234567890minio"

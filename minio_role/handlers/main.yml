@@ -1,0 +1,19 @@
+---
+# handlers file for minio_role
+
+- name: Restart MinIO
+  systemd:
+    name: "{{ handlers.restart_minio.name }}"
+    state: "{{ handlers.restart_minio.state }}"
+
+- name: Reload systemd
+  command: "{{ handlers.reload_systemd.command }}"
+  become: "{{ handlers.reload_systemd.become }}"
+  async: "{{ handlers.reload_systemd.async }}"
+  poll: "{{ handlers.reload_systemd.poll }}"
+  register: result
+
+- name: Debug systemd reload result
+  debug:
+    var: "{{ handlers.debug_systemd_result.debug_var }}"
+  become: "{{ handlers.debug_systemd_result.become }}"

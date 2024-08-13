@@ -1,0 +1,108 @@
+---
+# handlers variables
+
+handlers.restart_minio.name: minio
+handlers.restart_minio.state: restarted
+handlers.reload_systemd.command: systemctl daemon-reload
+handlers.reload_systemd.become: yes
+handlers.reload_systemd.async: 120
+handlers.reload_systemd.poll: 10
+handlers.debug_systemd_result.debug_var: result
+handlers.debug_systemd_result.become: yes
+
+
+# Variables for role metadata
+
+# Galaxy info
+author: "your_name"
+description: "Ansible role for MinIO"
+company: "your_company"
+license: "license_name"
+
+# Variables for configuring MinIO
+
+# Group and user settings
+minio_group_name: "minio"
+minio_user_name: "minio"
+minio_user_shell: "/sbin/nologin"
+minio_user_home: "/home/minio"
+minio_user_system: yes
+
+# MinIO directories and ownership
+minio_config_dir: "/etc/minio"
+minio_data_dir: "/data"
+minio_binary_path: "/usr/local/bin/minio"
+minio_service_src: "minio.service"
+minio_service_dest: "/etc/systemd/system/minio.service"
+
+# Permissions
+directory_mode: "0755"
+file_mode: "0644"
+
+# Variables for installing MinIO
+
+# MinIO binary download URL
+minio_download_url: "https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20240731054626.0.0_amd64.deb"
+
+# File paths and permissions
+minio_deb_path: "/tmp/minio.deb"
+deb_file_mode: "0755"
+
+
+# Variables for Debian-based systems tasks
+
+# Update apt package list
+update_cache: yes
+
+# File paths for tasks
+install_tasks_file: "install.yml"
+configure_tasks_file: "configure.yml"
+
+
+# General MinIO configuration
+minio_version: "RELEASE.2024-08-01T00-00-00Z"
+minio_port: 9000
+minio_access_key: "minio1234567890"
+minio_secret_key: "1234567890minio"
+
+minio_data_dirs:
+  single-node-single-drive:
+    - /data/minio1
+  single-node-multi-drive:
+    - /data/minio1
+    - /data/minio2
+    - /data/minio3
+    - /data/minio4
+  multi-node-multi-drive:
+    - /data/minio1
+    - /data/minio2
+    - /data/minio3
+    - /data/minio4
+
+# OS specific
+minio_user: "minio"
+minio_group: "minio"
+
+minio_packages:
+  RedHat: 
+    - wget
+    - unzip
+  Debian: 
+    - wget
+    - unzip
+  CentOS: 
+    - wget
+    - unzip
+
+minio_service: 
+  RedHat: "minio"
+  Debian: "minio"
+  CentOS: "minio"
+
+
+
+
+
+
+
+

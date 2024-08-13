@@ -1,0 +1,8 @@
+---
+- name: Install MinIO
+  include_tasks: "install.yml"
+
+- name: Configure MinIO
+  include_tasks: "configure.yml"
+
+

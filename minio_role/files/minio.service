@@ -1,0 +1,14 @@
+[Unit]
+Description=MinIO
+Documentation=https://docs.min.io
+After=network.target
+
+[Service]
+User=minio
+Group=minio
+ExecStart=/usr/local/bin/minio server /data --config-dir /etc/minio
+Restart=on-failure
+EnvironmentFile=-/etc/default/minio
+
+[Install]
+WantedBy=multi-user.target

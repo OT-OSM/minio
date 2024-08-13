@@ -1,0 +1,10 @@
+---
+# meta file for minio_role
+
+dependencies: []
+
+galaxy_info:
+  author: "{{ author }}"
+  description: "{{ description }}"
+  company: "{{ company }}"
+  license: "{{ license }}"
