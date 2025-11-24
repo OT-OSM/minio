@@ -1,0 +1,6 @@
+---
+# handlers file for minio
+- name: restart minio
+  systemd:
+    name: minio
+    state: restarted

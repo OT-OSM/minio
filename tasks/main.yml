@@ -1,0 +1,10 @@
+---
+# tasks file for minio
+- name: Install MinIO
+  include_tasks: install.yml
+
+- name: Configure MinIO
+  include_tasks: config.yml
+
+- name: Enable and Start MinIO
+  include_tasks: service.yml
