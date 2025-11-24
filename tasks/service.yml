@@ -1,0 +1,23 @@
+---
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable MinIO service
+  systemd:
+    name: "{{ minio_service_name }}"
+    enabled: yes
+
+- name: Start MinIO service
+  systemd:
+    name: "{{ minio_service_name }}"
+    state: started
+
+- name: Show MinIO service status
+  command: systemctl status {{ minio_service_name }} --no-pager
+  register: minio_status
+  changed_when: false
+
+- name: Print MinIO status output
+  debug:
+    var: minio_status.stdout_lines

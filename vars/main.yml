@@ -1,0 +1,16 @@
+---
+# vars file for minio
+# High-priority values (Environment Specific)
+
+minio_service_name: minio
+
+# Network settings
+minio_api_port: "9000"
+minio_console_port: "9001"
+
+# Directories 
+minio_data_dir: "/mnt/data"
+minio_config_dir: "/etc/minio"
+
+# MinIO download URL (version-specific)
+minio_binary_url: "https://dl.min.io/server/minio/release/linux-amd64/minio"

@@ -1,0 +1,34 @@
+---
+- name: Create minio group
+  group:
+    name: "{{ minio_group }}"
+    system: yes
+
+- name: Create minio user
+  user:
+    name: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    system: yes
+    shell: /sbin/nologin
+
+- name: Download MinIO binary
+  get_url:
+    url: "{{ minio_binary_url }}"
+    dest: /usr/local/bin/minio
+    mode: '0755'
+
+- name: Create data directory
+  file:
+    path: "{{ minio_data_dir }}"
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    state: directory
+    mode: '0755'
+
+- name: Create config directory
+  file:
+    path: "{{ minio_config_dir }}"
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    state: directory
+    mode: '0755'

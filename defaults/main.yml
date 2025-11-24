@@ -1,0 +1,9 @@
+---
+# defaults file for minio
+# default credentials 
+minio_root_user: "minioadmin"
+minio_root_password: "minioadmin123"
+
+# System user/group
+minio_user: "minio-user"
+minio_group: "minio-user"
