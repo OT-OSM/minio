@@ -1,0 +1,22 @@
+---
+- name: Validate system & prerequisites
+  ansible.builtin.include_tasks: prerequisites.yml
+
+- name: Install MinIO
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure MinIO
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Configure security (TLS / permissions)
+  ansible.builtin.include_tasks: security.yml
+
+- name: Configure observability
+  ansible.builtin.include_tasks: observability.yml
+  when: minio_observability_enabled | bool
+
+- name: Configure and start MinIO service
+  ansible.builtin.include_tasks: service.yml
+
+- name: Verify MinIO availability
+  ansible.builtin.include_tasks: verify.yml

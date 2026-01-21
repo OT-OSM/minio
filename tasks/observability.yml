@@ -1,0 +1,17 @@
+---
+# -------------------------------------------------------------------
+# Observability: Prometheus metrics exposure
+# Metrics are exposed; scraping is handled externally
+# -------------------------------------------------------------------
+
+- name: Enable MinIO Prometheus metrics (public)
+  ansible.builtin.lineinfile:
+    path: "{{ minio_env_file }}"
+    regexp: '^MINIO_PROMETHEUS_AUTH_TYPE='
+    line: 'MINIO_PROMETHEUS_AUTH_TYPE=public'
+    create: yes
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: "0600"
+  when: minio_observability_enabled | bool
+  notify: restart minio

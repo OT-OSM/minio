@@ -1,0 +1,108 @@
+---
+# ===================================================================
+# MinIO Prerequisites & Safety Validation
+# ===================================================================
+
+# -------------------------------------------------------------------
+# 1. Ensure base mount directory exists (NON-destructive)
+# -------------------------------------------------------------------
+- name: Ensure MinIO base mount directory exists
+  ansible.builtin.file:
+    path: "{{ item | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ minio_data_dirs }}"
+  when: minio_manage_base_path | bool
+
+# -------------------------------------------------------------------
+# 2. CRITICAL: Validate base mountpoint is mounted
+# -------------------------------------------------------------------
+- name: Check mount status of MinIO base mountpoints
+  ansible.builtin.command: findmnt -n {{ item | dirname }}
+  register: minio_mount_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ minio_data_dirs }}"
+
+- name: Fail if MinIO base mountpoint is not mounted
+  ansible.builtin.assert:
+    that:
+      - item.stdout | length > 0
+    fail_msg: >
+      MinIO base path {{ item.item | dirname }} is NOT a mounted filesystem.
+      Running MinIO on root disk is forbidden due to data-loss risk.
+  loop: "{{ minio_mount_check.results }}"
+  when: minio_base_path_required | bool
+
+# -------------------------------------------------------------------
+# 3. Ensure MinIO data directories exist (SAFE)
+# -------------------------------------------------------------------
+- name: Ensure MinIO data directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ minio_user | default('minio') }}"
+    group: "{{ minio_group | default('minio') }}"
+    mode: "0750"
+  loop: "{{ minio_data_dirs }}"
+
+# -------------------------------------------------------------------
+# 4. Validate OS compatibility
+# -------------------------------------------------------------------
+- name: Validate supported OS
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution in ["Ubuntu", "Debian", "RedHat", "CentOS", "Rocky", "AlmaLinux"]
+    fail_msg: >
+      Unsupported OS detected.
+      This MinIO role supports Ubuntu, Debian and RHEL-based systems only.
+
+# -------------------------------------------------------------------
+# 5. Validate MinIO credentials
+# -------------------------------------------------------------------
+- name: Validate MinIO credentials are injected
+  ansible.builtin.assert:
+    that:
+      - minio_root_user | length > 0
+      - minio_root_password | length > 0
+    fail_msg: >
+      MinIO credentials must be injected via Vault or extra-vars.
+      Hardcoding credentials is not allowed.
+
+# -------------------------------------------------------------------
+# 6. Validate HA configuration (only if enabled)
+# -------------------------------------------------------------------
+- name: Validate HA requirements
+  ansible.builtin.assert:
+    that:
+      - minio_ha_endpoints | length >= 4
+    fail_msg: >
+      MinIO HA requires at least 4 endpoints to maintain quorum.
+  when: minio_ha_enabled | bool
+
+# -------------------------------------------------------------------
+# 7. Validate DNS inputs (optional strict mode)
+# -------------------------------------------------------------------
+- name: Validate DNS inputs for single-node deployment
+  ansible.builtin.assert:
+    that:
+      - minio_dns_name | length > 0
+    fail_msg: >
+      DNS strict mode enabled but minio_dns_name is not provided.
+  when:
+    - minio_dns_enabled | bool
+    - minio_dns_strict | bool
+    - not minio_ha_enabled | bool
+
+- name: Validate DNS inputs for HA deployment
+  ansible.builtin.assert:
+    that:
+      - minio_lb_dns_name | length > 0
+    fail_msg: >
+      DNS strict mode enabled but load balancer DNS name is missing.
+  when:
+    - minio_dns_enabled | bool
+    - minio_dns_strict | bool
+    - minio_ha_enabled | bool

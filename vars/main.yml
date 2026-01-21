@@ -1,0 +1,24 @@
+# Protocol derived from TLS flag
+minio_protocol: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
+# Derived runtime protocol (DO NOT override)
+minio_scheme: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
+
+
+# Final endpoint identity used by clients
+minio_server_fqdn: >-
+  {{
+    (minio_dns_enabled | bool)
+    | ternary(
+        (minio_ha_enabled | bool)
+        | ternary(minio_lb_dns_name, minio_dns_name),
+        ansible_default_ipv4.address
+      )
+  }}
+
+# Final volume argument passed to MinIO ExecStart
+minio_volumes: >-
+  {{
+    (minio_ha_enabled | bool)
+    | ternary(minio_ha_endpoints | join(' '),
+              minio_data_dirs | join(' '))
+  }}

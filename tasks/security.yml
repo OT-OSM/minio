@@ -1,0 +1,22 @@
+---
+# -------------------------------------------------------------------
+# Security: TLS certificate handling
+# -------------------------------------------------------------------
+
+- name: Validate TLS configuration inputs
+  ansible.builtin.assert:
+    that:
+      - minio_tls_cert_dir is defined
+      - minio_tls_cert_dir | length > 0
+    fail_msg: >
+      TLS is enabled but minio_tls_cert_dir is not defined.
+  when: minio_tls_enabled | bool
+
+- name: Create MinIO TLS certificate directory
+  ansible.builtin.file:
+    path: "{{ minio_tls_cert_dir }}"
+    state: directory
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: "0700"
+  when: minio_tls_enabled | bool

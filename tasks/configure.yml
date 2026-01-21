@@ -1,0 +1,35 @@
+---
+# -------------------------------------------------------------------
+# Render MinIO environment file
+# This file controls runtime behavior (auth, endpoints, TLS, ports)
+# -------------------------------------------------------------------
+- name: Render MinIO environment file
+  ansible.builtin.template:
+    src: minio.env.j2
+    dest: "{{ minio_env_file }}"
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: "0600"
+  notify: restart minio
+
+# -------------------------------------------------------------------
+# Debug: Deployment visibility (for reviewers / logs)
+# -------------------------------------------------------------------
+- name: Show MinIO deployment mode
+  ansible.builtin.debug:
+    msg: >
+      MinIO deployment mode:
+      {{
+        'HA / Distributed' if minio_ha_enabled | bool
+        else 'Single Node'
+      }}
+
+- name: Show MinIO endpoint identity
+  ansible.builtin.debug:
+    msg: >
+      MinIO endpoint:
+      {{
+        minio_lb_dns_name if (minio_ha_enabled | bool and minio_dns_enabled | bool)
+        else minio_dns_name if minio_dns_enabled | bool
+        else 'IP-based access'
+      }}
