@@ -49,10 +49,18 @@ minio_dns_enabled: false
 minio_dns_name: ""
 minio_lb_dns_name: ""
 minio_dns_strict: false 
+
 # ===============================
 # Protocol / TLS
 # ===============================
-minio_tls_enabled: false   # HTTP fallback supported
+minio_tls_enabled: true
+
+# TLS certificate paths (MUST be provided when TLS is enabled)
+minio_tls_cert_file: ""
+minio_tls_key_file: ""
+
+# Derived protocol (DO NOT override)
+minio_protocol: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
 
 # ===============================
 # Authentication (Injected externally)

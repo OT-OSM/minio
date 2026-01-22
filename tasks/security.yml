@@ -1,22 +1,46 @@
 ---
-# -------------------------------------------------------------------
-# Security: TLS certificate handling
-# -------------------------------------------------------------------
-
-- name: Validate TLS configuration inputs
+- name: Validate TLS inputs
   ansible.builtin.assert:
     that:
-      - minio_tls_cert_dir is defined
-      - minio_tls_cert_dir | length > 0
-    fail_msg: >
-      TLS is enabled but minio_tls_cert_dir is not defined.
+      - minio_tls_cert_file | length > 0
+      - minio_tls_key_file | length > 0
   when: minio_tls_enabled | bool
 
-- name: Create MinIO TLS certificate directory
+- name: Check TLS cert exists
+  ansible.builtin.stat:
+    path: "{{ minio_tls_cert_file }}"
+  register: tls_cert
+  when: minio_tls_enabled | bool
+
+- name: Check TLS key exists
+  ansible.builtin.stat:
+    path: "{{ minio_tls_key_file }}"
+  register: tls_key
+  when: minio_tls_enabled | bool
+
+- name: Ensure MinIO TLS certificate ownership and permissions
   ansible.builtin.file:
-    path: "{{ minio_tls_cert_dir }}"
-    state: directory
+    path: "{{ item.path }}"
     owner: "{{ minio_user }}"
     group: "{{ minio_group }}"
-    mode: "0700"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ minio_tls_key_file }}",  mode: "0600" }
+    - { path: "{{ minio_tls_cert_file }}", mode: "0644" }
+  when: minio_tls_enabled | bool
+
+
+- name: Fail if TLS files missing
+  ansible.builtin.fail:
+    msg: "TLS enabled but cert/key missing on host"
+  when:
+    - minio_tls_enabled | bool
+    - not tls_cert.stat.exists or not tls_key.stat.exists
+
+- name: Ensure TLS directory permissions
+  ansible.builtin.file:
+    path: "{{ minio_tls_cert_dir }}"
+    owner: "{{ minio_user }}"
+    group: "{{ minio_group }}"
+    mode: "0750"
   when: minio_tls_enabled | bool

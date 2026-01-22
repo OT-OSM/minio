@@ -1,8 +1,9 @@
-# Protocol derived from TLS flag
-minio_protocol: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
-# Derived runtime protocol (DO NOT override)
-minio_scheme: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
+# =====================================================
+# Derived runtime values (DO NOT override directly)
+# =====================================================
 
+# Final runtime scheme used everywhere
+minio_scheme: "{{ minio_protocol }}"
 
 # Final endpoint identity used by clients
 minio_server_fqdn: >-

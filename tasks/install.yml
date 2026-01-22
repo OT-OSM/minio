@@ -47,7 +47,7 @@
 # ONLY if role is allowed to manage base path
 # (Prevents accidental data creation on root FS)
 # -------------------------------------------------------------------
-- name: Create MinIO data directories (managed mode)
+- name: Ensure MinIO data directories exist with correct ownership
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -55,7 +55,6 @@
     group: "{{ minio_group }}"
     mode: "0750"
   loop: "{{ minio_data_dirs }}"
-  when: minio_manage_base_path | bool
 
 # -------------------------------------------------------------------
 # Ensure MinIO configuration directory exists
