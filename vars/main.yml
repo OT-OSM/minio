@@ -4,6 +4,8 @@
 
 # Final runtime scheme used everywhere
 minio_scheme: "{{ minio_protocol }}"
+minio_admin_endpoint: >-
+  {{ minio_scheme }}://{{ minio_dns_name }}:{{ minio_api_port }}
 
 # Final endpoint identity used by clients
 minio_server_fqdn: >-
@@ -23,3 +25,4 @@ minio_volumes: >-
     | ternary(minio_ha_endpoints | join(' '),
               minio_data_dirs | join(' '))
   }}
+

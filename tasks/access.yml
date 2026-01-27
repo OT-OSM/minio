@@ -1,0 +1,123 @@
+---
+# -------------------------------------------------
+# Configure mc alias for MinIO
+# -------------------------------------------------
+- name: Remove existing mc alias if present
+  ansible.builtin.command: mc alias rm local
+  failed_when: false
+  changed_when: false
+
+- name: Configure mc alias for MinIO (admin)
+  ansible.builtin.command: >
+    mc alias set local
+    {{ minio_admin_endpoint }}
+    {{ minio_root_user }}
+    {{ minio_root_password }}
+    --api S3v4
+    --insecure
+  register: mc_alias
+  failed_when: mc_alias.rc != 0 
+  changed_when: "'Added' in mc_alias.stdout or 'Updated' in mc_alias.stdout"
+
+# -------------------------------------------------
+# Configure MinIO access (users & policies)
+# -------------------------------------------------
+- name: Configure MinIO access (users & policies)
+  when:
+    - minio_manage_access | bool
+    - minio_users | length > 0
+    - minio_policies | length > 0
+  block:
+
+    # -------------------------------------------------
+    # Ensure policy directory exists
+    # -------------------------------------------------
+    - name: Ensure policy directory exists
+      ansible.builtin.file:
+        path: /etc/minio/policies
+        state: directory
+        owner: "{{ minio_user }}"
+        group: "{{ minio_group }}"
+        mode: "0750"
+
+    # -------------------------------------------------
+    # Render bucket-level policy JSON files
+    # -------------------------------------------------
+    - name: Render policy files
+      ansible.builtin.template:
+        src: "policies/{{ item.template }}"
+        dest: "/etc/minio/policies/{{ item.name }}.json"
+        owner: "{{ minio_user }}"
+        group: "{{ minio_group }}"
+        mode: "0640"
+      loop: "{{ minio_policies }}"
+
+    # -------------------------------------------------
+    # Remove existing policies (CRITICAL FIX)
+    # -------------------------------------------------
+    - name: Remove existing policies
+      ansible.builtin.command: >
+        mc admin policy rm local {{ item.name }}
+      loop: "{{ minio_policies }}"
+      failed_when: false
+
+    # -------------------------------------------------
+    # Create bucket policies in MinIO (FAIL-FAST)
+    # -------------------------------------------------
+    - name: Create policies in MinIO
+      ansible.builtin.command: >
+        mc admin policy create local {{ item.name }}
+        /etc/minio/policies/{{ item.name }}.json
+      loop: "{{ minio_policies }}"
+      register: policy_create
+      failed_when: policy_create.rc != 0 
+
+    # -------------------------------------------------
+    # Create MinIO users
+    # -------------------------------------------------
+    - name: Create MinIO users
+      ansible.builtin.command: >
+        mc admin user add local {{ item.name }} {{ item.password }}
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    # -------------------------------------------------
+    # Detach default readonly policy
+    # -------------------------------------------------
+    - name: Detach default readonly policy
+      ansible.builtin.command: >
+        mc admin policy detach local readonly --user {{ item.name }}
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    # -------------------------------------------------
+    # Attach consoleAdmin only if required
+    # -------------------------------------------------
+    - name: Attach consoleAdmin only if required
+      ansible.builtin.command: >
+        mc admin policy attach local consoleAdmin --user {{ item.name }}
+      when: item.console_admin | default(false)
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    # -------------------------------------------------
+    # Attach bucket-level policies (readonly / editor)
+    # -------------------------------------------------
+    - name: Attach bucket policies to users
+      ansible.builtin.command: >
+        mc admin policy attach local {{ item.policy }} --user {{ item.name }}
+      loop: "{{ minio_users }}"
+      register: bucket_policy_attach
+      failed_when: bucket_policy_attach.rc != 0
+
+    # -------------------------------------------------
+    # Create MinIO webhook queue directory
+    # -------------------------------------------------
+    - name: Create MinIO webhook queue directory
+      ansible.builtin.file:
+        path: /var/lib/minio/notify/webhook
+        state: directory
+        owner: "{{ minio_user }}"
+        group: "{{ minio_group }}"
+        mode: "0750"
+      when: minio_bucket_notifications_enabled | bool

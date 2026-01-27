@@ -11,6 +11,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+StateDirectory=minio
 User={{ minio_user }}
 Group={{ minio_group }}
 
@@ -32,11 +33,7 @@ LimitNOFILE=65536
 # -----------------------------
 NoNewPrivileges=true
 PrivateTmp=true
-
-{% if minio_tls_enabled | bool %}
-# Allow MinIO to read TLS certs even with ProtectSystem enabled
-ReadWritePaths={{ minio_tls_cert_dir }}
-{% endif %}
+ReadWritePaths=/var/lib/minio{% if minio_tls_enabled | bool %} {{ minio_tls_cert_dir }}{% endif %}
 
 ProtectSystem=full
 ProtectHome=true

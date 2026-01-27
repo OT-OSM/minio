@@ -18,5 +18,12 @@
 - name: Configure and start MinIO service
   ansible.builtin.include_tasks: service.yml
 
+- name: Configure MinIO access (users & policies)
+  ansible.builtin.include_tasks: access.yml
+  when:
+    - minio_manage_access | bool
+    - minio_users is defined
+    - minio_users | length > 0
+
 - name: Verify MinIO availability
   ansible.builtin.include_tasks: verify.yml

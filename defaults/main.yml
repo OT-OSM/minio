@@ -56,8 +56,8 @@ minio_dns_strict: false
 minio_tls_enabled: true
 
 # TLS certificate paths (MUST be provided when TLS is enabled)
-minio_tls_cert_file: ""
-minio_tls_key_file: ""
+minio_tls_cert_file: "/etc/minio/certs/public.crt"
+minio_tls_key_file: "/etc/minio/certs/private.key"
 
 # Derived protocol (DO NOT override)
 minio_protocol: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
@@ -86,3 +86,68 @@ minio_ha_endpoints: []
 # ===============================
 minio_observability_enabled: true
 minio_metrics_public: true
+
+# -------------------------------
+# OIDC / SSO
+# -------------------------------
+minio_oidc_enabled: false
+
+minio_oidc_config_url: ""
+minio_oidc_client_id: ""
+minio_oidc_client_secret: ""
+minio_oidc_scopes: "openid,profile,email"
+minio_oidc_claim_name: "policy"
+minio_oidc_display_name: "Login with Keycloak"
+
+
+# ===============================
+# MinIO Access Management
+# ===============================
+
+# MASTER SWITCH
+# Access management is DISABLED by default
+minio_manage_access: false
+
+minio_users: []
+
+#   - name: user-a
+#     password: "{{ vault_user_a_password }}"
+#     policy: user-a-write-bucket-a
+
+#   - name: user-b
+#     password: "{{ vault_user_b_password }}"
+#     policy: read-only
+
+#   - name: user-c
+#     password: "{{ vault_user_c_password }}"
+#     policy: user-c-multi-rw
+
+
+
+minio_policies: []
+
+#   # User A → write only to bucket-a
+#   - name: user-a-write-bucket-a
+#     template: write-prefix.json.j2
+#     vars:
+#       bucket: bucket-a
+#       prefix: ""
+
+#   # User B → read-only access
+#   - name: read-only
+#     template: read-only.json.j2
+
+#   # User C → multiple buckets read/write
+#   - name: user-c-multi-rw
+#     template: multi-bucket-rw.json.j2
+#     vars:
+#       buckets:
+#         - bucket-a
+#         - bucket-b
+
+minio_bucket_notifications_enabled: false
+
+minio_webhook:
+  name: slack
+  minio_webhook:
+  endpoint: "{{ vault_slack_webhook }}"
