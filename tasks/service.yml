@@ -9,7 +9,7 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart minio
+  notify: Restart minio
 
 # -------------------------------------------------------------------
 # Enable and start MinIO service

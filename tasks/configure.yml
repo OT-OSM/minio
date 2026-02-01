@@ -10,7 +10,7 @@
     owner: "{{ minio_user }}"
     group: "{{ minio_group }}"
     mode: "0600"
-  notify: restart minio
+  notify: Restart minio
 
 # -------------------------------------------------------------------
 # Debug: Deployment visibility (for reviewers / logs)

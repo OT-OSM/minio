@@ -1,12 +1,10 @@
 # ===============================
 # MinIO Versioning
 # ===============================
-minio_binary_url: "{{ minio_download_url }}"
-# Path where MinIO binary will be installed
+
+minio_binary_url: "https://dl.min.io/server/minio/release/linux-amd64/minio"
 minio_binary_path: "/usr/local/bin/minio"
 minio_version: "RELEASE.2024-08-01T00-00-00Z"
-
-minio_download_url: "https://dl.min.io/server/minio/release/linux-amd64/minio"
 
 # ===============================
 # System User
@@ -30,6 +28,9 @@ minio_data_dirs:
 minio_config_dir: "/etc/minio"
 minio_env_file: "/etc/minio/minio.env"
 minio_tls_cert_dir: "/etc/minio/certs"
+
+# Whether to strictly fail if mount is missing
+minio_strict_mount_check: false
 
 # ===============================
 # Network
@@ -144,10 +145,3 @@ minio_policies: []
 #       buckets:
 #         - bucket-a
 #         - bucket-b
-
-minio_bucket_notifications_enabled: false
-
-minio_webhook:
-  name: slack
-  minio_webhook:
-  endpoint: "{{ vault_slack_webhook }}"

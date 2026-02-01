@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: Platform Engineering
+  author: Divya Mishra
   description: >
     MinIO Community VM-based deployment role with
     strict persistent storage enforcement,

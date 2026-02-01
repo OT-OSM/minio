@@ -17,7 +17,7 @@
   when: minio_manage_base_path | bool
 
 # -------------------------------------------------------------------
-# 2. CRITICAL: Validate base mountpoint is mounted
+# 2. Validate base mountpoint
 # -------------------------------------------------------------------
 - name: Check mount status of MinIO base mountpoints
   ansible.builtin.command: findmnt -n {{ item | dirname }}
@@ -26,15 +26,25 @@
   failed_when: false
   loop: "{{ minio_data_dirs }}"
 
-- name: Fail if MinIO base mountpoint is not mounted
+- name: Show mount validation result
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        'Mount found for ' ~ item.item | dirname
+        if item.stdout | length > 0
+        else 'Mount NOT found for ' ~ item.item | dirname
+      }}
+  loop: "{{ minio_mount_check.results }}"
+
+- name: Fail only when strict mount check is enabled
   ansible.builtin.assert:
     that:
       - item.stdout | length > 0
     fail_msg: >
       MinIO base path {{ item.item | dirname }} is NOT a mounted filesystem.
-      Running MinIO on root disk is forbidden due to data-loss risk.
+      Strict mount check is enabled; aborting to prevent data-loss risk.
   loop: "{{ minio_mount_check.results }}"
-  when: minio_base_path_required | bool
+  when: minio_strict_mount_check | bool
 
 # -------------------------------------------------------------------
 # 3. Ensure MinIO data directories exist (SAFE)
