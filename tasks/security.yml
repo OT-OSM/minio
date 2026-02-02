@@ -52,9 +52,3 @@
       - minio_oidc_client_id | length > 0
       - minio_oidc_client_secret | length > 0
   when: minio_oidc_enabled | bool
-
-- name: Validate webhook config
-  ansible.builtin.assert:
-    that:
-      - minio_webhook.endpoint | length > 0
-  when: minio_bucket_notifications_enabled | bool
