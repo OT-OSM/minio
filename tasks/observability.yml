@@ -14,4 +14,4 @@
     group: "{{ minio_group }}"
     mode: "0600"
   when: minio_observability_enabled | bool
-  notify: restart minio
+  notify: Restart minio

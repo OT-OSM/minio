@@ -4,14 +4,14 @@
 # -------------------------------------------------
 - name: Wait for MinIO API (localhost)
   ansible.builtin.wait_for:
-    host: 127.0.0.1
+    host: "{{ minio_runtime_host }}"
     port: "{{ minio_api_port }}"
     timeout: 60
 
 - name: Configure mc alias (ADMIN - localhost only)
   ansible.builtin.command: >
     mc alias set local
-    https://127.0.0.1:{{ minio_api_port }}
+    {{ minio_protocol }}://{{ ansible_default_ipv4.address }}:{{ minio_api_port }}
     {{ minio_root_user }}
     {{ minio_root_password }}
     --api S3v4

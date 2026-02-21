@@ -62,7 +62,7 @@
 # -------------------------------------------------------------------
 - name: Wait for MinIO API port to be reachable
   ansible.builtin.wait_for:
-    host: 127.0.0.1
+    host: "{{ minio_runtime_host }}"
     port: "{{ minio_api_port }}"
     delay: 5
     timeout: 120

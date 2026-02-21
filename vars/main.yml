@@ -2,15 +2,6 @@
 # Derived runtime values (DO NOT override directly)
 # =====================================================
 
-# Final runtime scheme used everywhere
-# Derived runtime values
-minio_scheme: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
-
-# ADMIN endpoint (mc always talks locally)
-minio_admin_endpoint: "{{ minio_scheme }}://127.0.0.1:{{ minio_api_port }}"
-
-
-# Final endpoint identity used by clients
 minio_server_fqdn: >-
   {{
     (minio_dns_enabled | bool)
@@ -21,11 +12,21 @@ minio_server_fqdn: >-
       )
   }}
 
-# Final volume argument passed to MinIO ExecStart
 minio_volumes: >-
   {{
     (minio_ha_enabled | bool)
-    | ternary(minio_ha_endpoints | join(' '),
-              minio_data_dirs | join(' '))
+    | ternary(
+        minio_ha_endpoints | join(' '),
+        minio_data_dirs | join(' ')
+      )
   }}
 
+# Runtime access host (used for health checks)
+minio_runtime_host: >-
+  {{
+    (minio_dns_enabled | bool)
+    | ternary(
+        minio_server_fqdn,
+        ansible_default_ipv4.address
+      )
+  }}
