@@ -1,5 +1,7 @@
 ---
 galaxy_info:
+  namespace: ot_osm
+  role_name: minio
   author: Divya Mishra
   description: >
     MinIO Community VM-based deployment role with
@@ -12,8 +14,8 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - focal   # 20.04
-        - jammy   # 22.04
+        - focal
+        - jammy
 
   galaxy_tags:
     - minio
