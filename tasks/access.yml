@@ -1,0 +1,101 @@
+---
+# -------------------------------------------------
+# Configure mc alias for MinIO (ADMIN – localhost only)
+# -------------------------------------------------
+- name: Wait for MinIO API (localhost)
+  ansible.builtin.wait_for:
+    host: "{{ minio_runtime_host }}"
+    port: "{{ minio_api_port }}"
+    timeout: 60
+
+- name: Configure mc alias (ADMIN - localhost only)
+  ansible.builtin.command: >
+    mc alias set local
+    {{ minio_protocol }}://{{ ansible_default_ipv4.address }}:{{ minio_api_port }}
+    {{ minio_root_user }}
+    {{ minio_root_password }}
+    --api S3v4
+    {% if minio_tls_enabled | bool %}--insecure{% endif %}
+  register: mc_alias
+  failed_when: mc_alias.rc != 0
+  changed_when: "'Added' in mc_alias.stdout or 'Updated' in mc_alias.stdout"
+  environment:
+    MINIO_SERVER_URL: ""
+
+# -------------------------------------------------
+# Configure MinIO access (users & policies)
+# -------------------------------------------------
+- name: Configure MinIO access (users & policies)
+  when:
+    - minio_manage_access | bool
+    - minio_users | length > 0
+    - minio_policies | length > 0
+  block:
+
+    - name: Ensure policy directory exists
+      ansible.builtin.file:
+        path: /etc/minio/policies
+        state: directory
+        owner: "{{ minio_user }}"
+        group: "{{ minio_group }}"
+        mode: "0750"
+
+    - name: Render policy files
+      ansible.builtin.template:
+        src: "policies/{{ item.template }}"
+        dest: "/etc/minio/policies/{{ item.name }}.json"
+        owner: "{{ minio_user }}"
+        group: "{{ minio_group }}"
+        mode: "0640"
+      loop: "{{ minio_policies }}"
+
+    - name: List existing MinIO policies
+      ansible.builtin.command: >
+        mc admin policy list local
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      register: existing_policies
+      changed_when: false
+      failed_when: false
+      environment:
+        MINIO_SERVER_URL: ""
+
+    - name: Create policies if not present
+      ansible.builtin.command: >
+        mc admin policy create local {{ item.name }}
+        /etc/minio/policies/{{ item.name }}.json
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      loop: "{{ minio_policies }}"
+      when: item.name not in existing_policies.stdout
+      failed_when: false
+      changed_when: true
+      environment:
+        MINIO_SERVER_URL: ""
+
+    - name: Create MinIO users
+      ansible.builtin.command: >
+        mc admin user add local {{ item.name }} {{ item.password }}
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    - name: Detach default readonly policy
+      ansible.builtin.command: >
+        mc admin policy detach local readonly --user {{ item.name }}
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    - name: Attach consoleAdmin only if required
+      ansible.builtin.command: >
+        mc admin policy attach local consoleAdmin --user {{ item.name }}
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      when: item.console_admin | default(false)
+      loop: "{{ minio_users }}"
+      failed_when: false
+
+    - name: Attach bucket policies to users
+      ansible.builtin.command: >
+        mc admin policy attach local {{ item.policy }} --user {{ item.name }}
+        {% if minio_tls_enabled | bool %}--insecure{% endif %}
+      loop: "{{ minio_users }}"
+      failed_when: false

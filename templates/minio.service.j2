@@ -1,0 +1,42 @@
+[Unit]
+Description=MinIO Object Storage
+Documentation=https://min.io/docs/
+
+{% for dir in minio_data_dirs %}
+RequiresMountsFor={{ dir | dirname }}
+{% endfor %}
+
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+StateDirectory=minio
+User={{ minio_user }}
+Group={{ minio_group }}
+
+WorkingDirectory={{ minio_data_dirs[0] }}
+
+EnvironmentFile={{ minio_env_file }}
+
+ExecStart={{ minio_binary_path }} server {{ minio_volumes }} \
+  --address 0.0.0.0:{{ minio_api_port }} \
+  --console-address 0.0.0.0:{{ minio_console_port }}{% if minio_tls_enabled | bool %} \
+  --certs-dir {{ minio_tls_cert_dir }}{% endif %}
+
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+# -----------------------------
+# Security hardening (SAFE)
+# -----------------------------
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/minio{% if minio_tls_enabled | bool %} {{ minio_tls_cert_dir }}{% endif %}
+
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

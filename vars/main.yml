@@ -1,0 +1,32 @@
+# =====================================================
+# Derived runtime values (DO NOT override directly)
+# =====================================================
+
+minio_server_fqdn: >-
+  {{
+    (minio_dns_enabled | bool)
+    | ternary(
+        (minio_ha_enabled | bool)
+        | ternary(minio_lb_dns_name, minio_dns_name),
+        ansible_default_ipv4.address
+      )
+  }}
+
+minio_volumes: >-
+  {{
+    (minio_ha_enabled | bool)
+    | ternary(
+        minio_ha_endpoints | join(' '),
+        minio_data_dirs | join(' ')
+      )
+  }}
+
+# Runtime access host (used for health checks)
+minio_runtime_host: >-
+  {{
+    (minio_dns_enabled | bool)
+    | ternary(
+        minio_server_fqdn,
+        ansible_default_ipv4.address
+      )
+  }}

@@ -1,0 +1,79 @@
+---
+# -------------------------------------------------------------------
+# Verify MinIO service is running (Keycloak-style)
+# -------------------------------------------------------------------
+- name: Verify MinIO service state
+  ansible.builtin.command: systemctl is-active {{ minio_service_name }}
+  register: minio_status
+  changed_when: false
+  failed_when: minio_status.stdout not in ["active", "activating"]
+
+# -------------------------------------------------------------------
+# Informational: TLS / Protocol status
+# -------------------------------------------------------------------
+- name: Show MinIO protocol status
+  ansible.builtin.debug:
+    msg: >
+      MinIO protocol is {{
+        'HTTPS' if (minio_tls_enabled | bool)
+        else 'HTTP'
+      }}.
+      TLS readiness depends on certificate configuration.
+
+# -------------------------------------------------------------------
+# Observability validation
+# -------------------------------------------------------------------
+- name: Validate observability configuration
+  ansible.builtin.assert:
+    that:
+      - minio_metrics_public | bool
+    fail_msg: >
+      MinIO observability is enabled but metrics exposure is misconfigured.
+  when: minio_observability_enabled | bool
+
+# -------------------------------------------------------------------
+# Validate TLS configuration (if enabled)
+# -------------------------------------------------------------------
+- name: Validate TLS inputs when HTTPS is enabled
+  ansible.builtin.assert:
+    that:
+      - minio_tls_cert_dir | length > 0
+    fail_msg: >
+      TLS is enabled but certificate directory is not provided.
+  when: minio_tls_enabled | bool
+
+- name: Check TLS directory exists
+  ansible.builtin.stat:
+    path: "{{ minio_tls_cert_dir }}"
+  register: minio_tls_dir
+  when: minio_tls_enabled | bool
+
+- name: Fail if TLS directory is missing
+  ansible.builtin.fail:
+    msg: >
+      TLS certificate directory does not exist on the target host.
+      MinIO will not start with HTTPS enabled.
+  when:
+    - minio_tls_enabled | bool
+    - not minio_tls_dir.stat.exists
+
+# -------------------------------------------------------------------
+# Wait for MinIO API port (soft readiness check)
+# -------------------------------------------------------------------
+- name: Wait for MinIO API port to be reachable
+  ansible.builtin.wait_for:
+    host: "{{ minio_runtime_host }}"
+    port: "{{ minio_api_port }}"
+    delay: 5
+    timeout: 120
+
+# -------------------------------------------------------------------
+# Success message
+# -------------------------------------------------------------------
+- name: MinIO verification successful
+  ansible.builtin.debug:
+    msg: |
+      MinIO verification passed
+      Service State : {{ minio_status.stdout }}
+      API Endpoint  : {{ minio_protocol }}://{{ minio_server_fqdn }}:{{ minio_api_port }}
+      Console       : {{ minio_protocol }}://{{ minio_server_fqdn }}:{{ minio_console_port }}

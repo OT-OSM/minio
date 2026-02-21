@@ -1,0 +1,147 @@
+# ===============================
+# MinIO Versioning
+# ===============================
+
+minio_binary_url: "https://dl.min.io/server/minio/release/linux-amd64/minio"
+minio_binary_path: "/usr/local/bin/minio"
+minio_version: "RELEASE.2024-08-01T00-00-00Z"
+
+# ===============================
+# System User
+# ===============================
+minio_user: "minio"
+minio_group: "minio"
+
+# ===============================
+# Paths
+# ===============================
+# Whether MinIO role is allowed to create base data path
+# true  = role creates /mnt/minio if missing (NON-DESTRUCTIVE)
+# false = strict mode, expect infra to prepare mount
+minio_manage_base_path: true        # Role may create directory
+minio_base_path_required: true      # Validation is MANDATORY
+
+minio_base_dir: "/opt/minio"
+minio_data_dirs:
+  - "/mnt/minio/data"
+
+minio_config_dir: "/etc/minio"
+minio_env_file: "/etc/minio/minio.env"
+minio_tls_cert_dir: "/etc/minio/certs"
+
+# Whether to strictly fail if mount is missing
+minio_strict_mount_check: false
+
+# ===============================
+# Network
+# ===============================
+minio_api_port: 9000
+minio_console_port: 8443
+
+# ===============================
+# Service
+# ===============================
+minio_service_name: minio
+
+# ===============================
+# Access / Endpoint Identity
+# ===============================
+minio_dns_enabled: false
+minio_dns_name: ""
+minio_lb_dns_name: ""
+minio_dns_strict: false 
+
+# ===============================
+# Protocol / TLS
+# ===============================
+minio_tls_enabled: true
+
+# TLS certificate paths (MUST be provided when TLS is enabled)
+minio_tls_cert_file: "/etc/minio/certs/public.crt"
+minio_tls_key_file: "/etc/minio/certs/private.key"
+
+# Derived protocol (DO NOT override)
+minio_protocol: "{{ 'https' if minio_tls_enabled | bool else 'http' }}"
+
+# ===============================
+# Authentication (Injected externally)
+# ===============================
+minio_root_user: ""
+minio_root_password: ""
+
+# ===============================
+# High Availability
+# ===============================
+minio_ha_enabled: false
+
+# Used only if HA enabled
+minio_ha_endpoints: []
+# example:
+# - https://minio-1:9000/mnt/minio/data
+# - https://minio-2:9000/mnt/minio/data
+# - https://minio-3:9000/mnt/minio/data
+# - https://minio-4:9000/mnt/minio/data
+
+# ===============================
+# Observability
+# ===============================
+minio_observability_enabled: true
+minio_metrics_public: true
+
+# -------------------------------
+# OIDC / SSO
+# -------------------------------
+minio_oidc_enabled: false
+
+minio_oidc_config_url: ""
+minio_oidc_client_id: ""
+minio_oidc_client_secret: ""
+minio_oidc_scopes: "openid,profile,email"
+minio_oidc_claim_name: "policy"
+minio_oidc_display_name: "Login with Keycloak"
+
+
+# ===============================
+# MinIO Access Management
+# ===============================
+
+# MASTER SWITCH
+# Access management is DISABLED by default
+minio_manage_access: false
+
+minio_users: []
+
+#   - name: user-a
+#     password: "{{ vault_user_a_password }}"
+#     policy: user-a-write-bucket-a
+
+#   - name: user-b
+#     password: "{{ vault_user_b_password }}"
+#     policy: read-only
+
+#   - name: user-c
+#     password: "{{ vault_user_c_password }}"
+#     policy: user-c-multi-rw
+
+
+
+minio_policies: []
+
+#   # User A → write only to bucket-a
+#   - name: user-a-write-bucket-a
+#     template: write-prefix.json.j2
+#     vars:
+#       bucket: bucket-a
+#       prefix: ""
+
+#   # User B → read-only access
+#   - name: read-only
+#     template: read-only.json.j2
+
+#   # User C → multiple buckets read/write
+#   - name: user-c-multi-rw
+#     template: multi-bucket-rw.json.j2
+#     vars:
+#       buckets:
+#         - bucket-a
+#         - bucket-b
